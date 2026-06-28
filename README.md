@@ -1,2 +1,10 @@
-# fintech-enterprise-platform
-repo for microservices of a banking platform
+fintech-enterprise-platform
+
+├── terraform
+├── kubernetes
+├── services
+├── jenkins
+├── docs
+├── diagrams
+└── README.md
+
