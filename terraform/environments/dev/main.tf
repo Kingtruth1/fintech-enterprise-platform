@@ -36,3 +36,11 @@ module "vpc" {
   ]
 
 }
+
+module "ecr" {
+
+  source = "../../modules/ecr"
+
+  environment = "dev"
+
+}
