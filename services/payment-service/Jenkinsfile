@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -17,34 +18,42 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm ci'
+                dir('services/payment-service') {
+                    sh 'npm ci'
+                }
             }
         }
 
         stage('Test') {
             steps {
-                sh 'npm test'
+                dir('services/payment-service') {
+                    sh 'npm test'
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh '''
-                    docker build \
-                      -t ${ECR_REPOSITORY}:${IMAGE_TAG} \
-                      .
-                '''
+                dir('services/payment-service') {
+                    sh '''
+                        docker build \
+                          -t ${ECR_REPOSITORY}:${IMAGE_TAG} \
+                          .
+                    '''
+                }
             }
         }
 
         stage('Security Scan') {
             steps {
-                sh '''
-                    trivy image \
-                      --severity HIGH,CRITICAL \
-                      --exit-code 1 \
-                      ${ECR_REPOSITORY}:${IMAGE_TAG}
-                '''
+                dir('services/payment-service') {
+                    sh '''
+                        trivy image \
+                          --severity HIGH,CRITICAL \
+                          --exit-code 1 \
+                          ${ECR_REPOSITORY}:${IMAGE_TAG}
+                    '''
+                }
             }
         }
 
@@ -84,3 +93,4 @@ pipeline {
         }
     }
 }
+```
