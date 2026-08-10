@@ -37,8 +37,8 @@ stages {
             dir('services/payment-service') {
                 sh '''
                     docker build \
-                      -t ${ECR_REPOSITORY}:${IMAGE_TAG} \
-                      .
+                        -t ${ECR_REPOSITORY}:${IMAGE_TAG} \
+                        .
                 '''
             }
         }
@@ -49,9 +49,9 @@ stages {
             dir('services/payment-service') {
                 sh '''
                     trivy image \
-                      --severity HIGH,CRITICAL \
-                      --exit-code 1 \
-                      ${ECR_REPOSITORY}:${IMAGE_TAG}
+                        --severity HIGH,CRITICAL \
+                        --exit-code 1 \
+                        ${ECR_REPOSITORY}:${IMAGE_TAG}
                 '''
             }
         }
@@ -59,26 +59,28 @@ stages {
 
     stage('Push to ECR') {
         steps {
-            sh '''
-                AWS_ACCOUNT_ID=$(aws sts get-caller-identity \
-                  --query Account \
-                  --output text)
+            dir('services/payment-service') {
+                sh '''
+                    AWS_ACCOUNT_ID=$(aws sts get-caller-identity \
+                        --query Account \
+                        --output text)
 
-                ECR_URL=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                    ECR_URL=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
-                aws ecr get-login-password \
-                  --region ${AWS_REGION} | \
-                  docker login \
-                  --username AWS \
-                  --password-stdin ${ECR_URL}
+                    aws ecr get-login-password \
+                        --region ${AWS_REGION} | \
+                        docker login \
+                        --username AWS \
+                        --password-stdin ${ECR_URL}
 
-                docker tag \
-                  ${ECR_REPOSITORY}:${IMAGE_TAG} \
-                  ${ECR_URL}/${ECR_REPOSITORY}:${IMAGE_TAG}
+                    docker tag \
+                        ${ECR_REPOSITORY}:${IMAGE_TAG} \
+                        ${ECR_URL}/${ECR_REPOSITORY}:${IMAGE_TAG}
 
-                docker push \
-                  ${ECR_URL}/${ECR_REPOSITORY}:${IMAGE_TAG}
-            '''
+                    docker push \
+                        ${ECR_URL}/${ECR_REPOSITORY}:${IMAGE_TAG}
+                '''
+            }
         }
     }
 }
